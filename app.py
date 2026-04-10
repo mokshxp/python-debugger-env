@@ -22,6 +22,41 @@ def _get_env(task_id: str) -> PythonDebuggerEnv:
         _envs[task_id] = PythonDebuggerEnv(task_id=task_id)
     return _envs[task_id]
 
+def run_agent_on_task(task_id: str):
+    from openai import OpenAI
+    import os
+    
+    # Get token from environment (HF Secrets)
+    api_key = os.environ.get("HF_TOKEN")
+    if not api_key:
+        return {"error": "HF_TOKEN secret not found in Space settings."}
+        
+    client = OpenAI(base_url="https://router.huggingface.co/v1", api_key=api_key)
+    env = _get_env(task_id)
+    obs = env.reset()
+    
+    # Run simple 1-step test for demo
+    user_prompt = f"CURRENT CODE:\n{obs.current_code}\n\nFEEDBACK: {obs.feedback}\n\nWrite the corrected Python code:"
+    completion = client.chat.completions.create(
+        model="Qwen/Qwen2.5-72B-Instruct",
+        messages=[
+            {"role": "system", "content": "You are an expert Python engineer. Output ONLY raw code."},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0.2,
+        max_tokens=512,
+    )
+    code = completion.choices[0].message.content.replace("```python", "").replace("```", "").strip()
+    obs, reward, done, _ = env.step(Action(code=code))
+    
+    return {
+        "task_id": task_id,
+        "agent_code": code,
+        "success": obs.test_results["success"],
+        "reward": reward.value,
+        "error": obs.test_results["error"]
+    }
+
 class ResetRequest(BaseModel):
     task_id: str = "task_easy"
     model_config = {"extra": "ignore"}
@@ -53,6 +88,8 @@ def home():
                 <h3>{t.name}</h3>
             </div>
             <p>ID: <code>{t.id}</code> | Max Steps: {t.max_steps}</p>
+            <button class="run-btn" onclick="runAgent('{t.id}')">Run AI Agent Demo</button>
+            <div id="result-{t.id}" class="result-box" style="display:none;"></div>
         </div>
         """ for t in TASKS.values()
     ])
@@ -101,7 +138,38 @@ def home():
             .links {{ margin-top: 20px; }}
             a {{ color: #818cf8; text-decoration: none; font-weight: 600; margin-right: 20px; }}
             a:hover {{ text-decoration: underline; }}
+
+            .run-btn {{ margin-top: 15px; background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }}
+            .run-btn:hover {{ opacity: 0.9; }}
+            .result-box {{ margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px; font-size: 0.85rem; border-left: 4px solid var(--primary); white-space: pre-wrap; }}
         </style>
+        <script>
+            async function runAgent(taskId) {{
+                const btn = event.target;
+                const resBox = document.getElementById('result-' + taskId);
+                btn.disabled = true;
+                btn.innerText = 'Agent Thinking...';
+                resBox.style.display = 'block';
+                resBox.innerText = 'Sending task to AI...';
+                
+                try {{
+                    const response = await fetch('/demo/' + taskId, {{ method: 'POST' }});
+                    const data = await response.json();
+                    if (data.error) {{
+                        resBox.innerHTML = '<span style="color:#f87171">Error: ' + data.error + '</span>';
+                    }} else {{
+                        resBox.innerHTML = '<b>Result:</b> ' + (data.success ? '✅ Success' : '❌ Failed') + 
+                                         '\\n<b>Reward:</b> ' + data.reward + 
+                                         '\\n<b>Code:</b>\\n<code>' + data.agent_code + '</code>';
+                    }}
+                }} catch (e) {{
+                    resBox.innerText = 'Error connection to API.';
+                }} finally {{
+                    btn.disabled = false;
+                    btn.innerText = 'Run AI Agent Demo';
+                }}
+            }}
+        </script>
     </head>
     <body>
         <div class="container">
@@ -130,6 +198,10 @@ def home():
 @app.get("/health")
 def health():
     return {"status": "ok", "environment": "python-debugger", "version": "1.0.0"}
+
+@app.post("/demo/{task_id}")
+def run_demo(task_id: str):
+    return run_agent_on_task(task_id)
 
 @app.get("/tasks")
 def list_tasks():

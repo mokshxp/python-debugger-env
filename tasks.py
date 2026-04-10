@@ -45,7 +45,7 @@ def run_tests():
         except Exception as e:
             errors.append(f"Test {i+1} raised {type(e).__name__}: {str(e)}")
             
-    print(json.dumps({{"passed": passed, "total": len(tests), "errors": errors}}))
+    print(json.dumps({"passed": passed, "total": len(tests), "errors": errors}))
 
 if __name__ == "__main__":
     run_tests()
@@ -100,7 +100,7 @@ def run_tests():
         except Exception as e:
             errors.append(f"Test {i+1} failed: {type(e).__name__}")
             
-    print(json.dumps({{"passed": passed, "total": len(tests), "errors": errors}}))
+    print(json.dumps({"passed": passed, "total": len(tests), "errors": errors}))
 
 if __name__ == "__main__":
     run_tests()
@@ -167,7 +167,7 @@ def run_tests():
     except Exception as e:
         errors.append(f"Performance test err: {e}")
         
-    print(json.dumps({{"passed": passed, "total": 5, "errors": errors}}))
+    print(json.dumps({"passed": passed, "total": 5, "errors": errors}))
 
 if __name__ == "__main__":
     run_tests()

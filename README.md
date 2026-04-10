@@ -12,6 +12,7 @@ tags:
 ---
 
 # OpenEnv Python Debugger
+> Status: Deployment triggered.
 
 A real-world OpenEnv environment where an AI agent learns to write, debug, and optimize Python code by working with a live Python interpreter.
 

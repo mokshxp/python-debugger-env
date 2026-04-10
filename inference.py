@@ -11,7 +11,7 @@ from openai import OpenAI
 API_BASE_URL = os.environ.get("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME   = os.environ.get("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 API_KEY      = os.environ.get("HF_TOKEN") or os.environ.get("API_KEY", "")
-ENV_URL      = os.environ.get("ENV_URL", "http://localhost:7860")
+ENV_URL      = os.environ.get("ENV_URL", "https://moksh24-python-debugger-env.hf.space")
 BENCHMARK    = "python-debugger"
 
 TASK_IDS    = ["task_easy", "task_medium", "task_hard"]

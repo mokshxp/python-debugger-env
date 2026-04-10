@@ -1,0 +1,68 @@
+name: python-debugger
+version: "1.0.0"
+description: >
+  A real-world environment where an AI agent debugs, fixes, and optimizes Python code 
+  against an interactive python runtime. Simulates the daily work of software engineers 
+  who must identify syntax errors, logic bugs, test case failures, and write optimized Python code.
+author: OpenEnv Python Debugger
+license: MIT
+tags:
+  - openenv
+  - python
+  - debugging
+  - software-engineering
+  - real-world
+
+tasks:
+  - id: task_easy
+    name: "Python Syntax Fix"
+    difficulty: easy
+    description: >
+      Fix a Python function with clear syntax/semantic errors so it runs and passes 
+      simple test cases.
+    max_steps: 10
+    reward_threshold: 0.8
+
+  - id: task_medium
+    name: "Python Logic Repair"
+    difficulty: medium
+    description: >
+      Repair a Python algorithm that has subtle logical errors. The function runs without 
+      error but fails for edge cases in the test suite.
+    max_steps: 15
+    reward_threshold: 0.8
+
+  - id: task_hard
+    name: "Algorithm Optimization & Correctness"
+    difficulty: hard
+    description: >
+      Given a slow, brute-force Python implementation, produce a correct AND
+      efficient implementation that passes tests without timing out.
+    max_steps: 20
+    reward_threshold: 0.8
+
+observation_space:
+  type: object
+  properties:
+    task_id: {type: string}
+    current_code: {type: string, description: "Agent's current Python code"}
+    test_results:
+      type: object
+      properties:
+        success: {type: boolean}
+        tests_passed: {type: integer}
+        total_tests: {type: integer}
+        error: {type: string, description: "Error message or stack trace if execution failed"}
+        stdout: {type: string, description: "Standard output from execution"}
+    feedback: {type: string, description: "Partial grader feedback for the agent"}
+    step: {type: integer}
+    max_steps: {type: integer}
+    score: {type: number, description: "Current best score 0.0-1.0"}
+
+action_space:
+  type: object
+  properties:
+    code:
+      type: string
+      description: "The Python code to submit. Agent replaces this each step."
+  required: [code]

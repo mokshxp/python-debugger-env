@@ -23,5 +23,9 @@ dependencies = [
     "openenv-core>=0.2.3"
 ]
 
+[project.scripts]
+server = "server.app:app"
+
 [tool.setuptools]
-py-modules = ["app", "env", "models", "tasks"]
+package-dir = {"" = "."}
+packages = ["server"]

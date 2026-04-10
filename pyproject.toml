@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-debugger"
+version = "1.0.0"
+description = "A real-world OpenEnv environment for debugging Python code."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Moksh", email = "moksh@example.com"}
+]
+keywords = ["openenv", "python", "debugging"]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "requests",
+    "openai",
+    "httpx",
+    "openenv-core>=0.2.3"
+]
+
+[tool.setuptools]
+py-modules = ["app", "env", "models", "tasks"]
